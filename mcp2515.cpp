@@ -13,11 +13,9 @@ const struct MCP2515::RXBn_REGS MCP2515::RXB[N_RXBUFFERS] = {
 
 MCP2515::MCP2515(const uint8_t _CS)
 {
-    SPI.begin();
-
     SPICS = _CS;
     pinMode(SPICS, OUTPUT);
-    endSPI();
+    digitalWrite(SPICS, HIGH);
 }
 
 void MCP2515::startSPI() {
@@ -28,6 +26,12 @@ void MCP2515::startSPI() {
 void MCP2515::endSPI() {
     digitalWrite(SPICS, HIGH);
     SPI.endTransaction();
+}
+
+MCP2515::ERROR MCP2515::begin(void) {
+	SPI.begin();
+	reset();
+	return ERROR_OK; 
 }
 
 MCP2515::ERROR MCP2515::reset(void)
@@ -160,6 +164,11 @@ MCP2515::ERROR MCP2515::setLoopbackMode()
 MCP2515::ERROR MCP2515::setNormalMode()
 {
     return setMode(CANCTRL_REQOP_NORMAL);
+}
+
+MCP2515::ERROR MCP2515::setOneShotMode()
+{
+    return setMode(CANCTRL_REQOP_ONESHOT);
 }
 
 MCP2515::ERROR MCP2515::setMode(const CANCTRL_REQOP_MODE mode)
