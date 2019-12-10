@@ -7,9 +7,8 @@ MCP2515 mcp2515(10);
 
 void setup() {
   Serial.begin(115200);
-  SPI.begin();
   
-  mcp2515.reset();
+  mcp2515.begin();
   mcp2515.setBitrate(CAN_125KBPS);
   mcp2515.setNormalMode();
   

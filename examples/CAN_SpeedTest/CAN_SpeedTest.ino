@@ -9,9 +9,8 @@ unsigned long oldTime = 0;
  
 void setup() {
   Serial.begin(115200);
-  SPI.begin();
  
-  mcp2515.reset();
+  mcp2515.begin();
   mcp2515.setBitrate(CAN_125KBPS);
   mcp2515.setNormalMode();
  
