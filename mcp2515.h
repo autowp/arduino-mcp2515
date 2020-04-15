@@ -459,6 +459,8 @@ class MCP2515
         void clearRXnOVRFlags(void);
         uint8_t getInterrupts(void);
         uint8_t getInterruptMask(void);
+        uint8_t getTECRegister(void);
+        uint8_t getRECRegister(void);
         void clearInterrupts(void);
         void clearTXInterrupts(void);
         uint8_t getStatus(void);

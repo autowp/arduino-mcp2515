@@ -675,6 +675,19 @@ uint8_t MCP2515::getInterruptMask(void)
     return readRegister(MCP_CANINTE);
 }
 
+uint8_t MCP2515::getTECRegister(void)
+{
+    return readRegister(MCP_TEC);
+}
+
+uint8_t MCP2515::getRECRegister(void)
+{
+    return readRegister(MCP_REC);
+}
+
+
+
+
 void MCP2515::clearTXInterrupts(void)
 {
     modifyRegister(MCP_CANINTF, (CANINTF_TX0IF | CANINTF_TX1IF | CANINTF_TX2IF), 0);
