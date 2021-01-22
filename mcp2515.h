@@ -458,9 +458,10 @@ class MCP2515
         void modifyRegister(const REGISTER reg, const uint8_t mask, const uint8_t data);
 
         void prepareId(uint8_t *buffer, const bool ext, const uint32_t id);
-    
+
+        SPIClass & _spi;
     public:
-        MCP2515(const uint8_t _CS);
+        MCP2515(const uint8_t _CS, SPIClass & spi = SPI);
         ERROR reset(void);
         ERROR setConfigMode();
         ERROR setListenOnlyMode();
