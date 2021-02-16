@@ -461,7 +461,7 @@ class MCP2515
 
         SPIClass & _spi;
     public:
-        MCP2515(const uint8_t _CS, SPIClass & spi = SPI);
+        MCP2515(const uint8_t _CS, SPIClass & spi = SPI, const bool doBegin = true);
         ERROR reset(void);
         ERROR setConfigMode();
         ERROR setListenOnlyMode();

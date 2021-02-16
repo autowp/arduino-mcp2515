@@ -12,10 +12,10 @@ const struct MCP2515::RXBn_REGS MCP2515::RXB[N_RXBUFFERS] = {
     {MCP_RXB1CTRL, MCP_RXB1SIDH, MCP_RXB1DATA, CANINTF_RX1IF}
 };
 
-MCP2515::MCP2515(const uint8_t _CS, SPIClass & spi):
+MCP2515::MCP2515(const uint8_t _CS, SPIClass & spi, const bool doBegin):
     _spi(spi)
 {
-    _spi.begin();
+    if (doBegin) _spi.begin();
 
     SPICS = _CS;
     pinMode(SPICS, OUTPUT);
