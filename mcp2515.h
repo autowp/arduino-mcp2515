@@ -444,6 +444,8 @@ class MCP2515
 
         uint8_t SPICS;
 
+        uint8_t mcp2515_rx_index = 0;
+
     private:
 
         void startSPI();
