@@ -173,10 +173,13 @@ MCP2515::ERROR MCP2515::setNormalMode()
 MCP2515::ERROR MCP2515::setMode(const CANCTRL_REQOP_MODE mode)
 {
     // Check for oneshot mode.
-    mode = osmFlag ? mode | CANCTRL_OSM : mode & ~(CANCTRL_OSM);
+    uint8_t mcpMode = osmFlag ? mode | CANCTRL_OSM : mode & ~(CANCTRL_OSM);
 
-    modifyRegister(MCP_CANCTRL, CANCTRL_REQOP, mode);
+    // Writing CANCTRL register.
+    modifyRegister(MCP_CANCTRL, CANCTRL_REQOP, mcpMode);
 
+    // Checking from CANSTAT register only confirms the main working modes,
+    // and interrupts. Bit 4 is unimplemented.
     unsigned long endTime = millis() + 10;
     bool modeMatch = false;
     while (millis() < endTime) {
