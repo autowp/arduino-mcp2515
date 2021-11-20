@@ -260,6 +260,14 @@ class MCP2515
             EFLG_RXWAR  = (1<<1),
             EFLG_EWARN  = (1<<0)
         };
+        
+        
+        enum PRIORITY : uint8_t{
+        	PRIORITY_HIGHEST = 0x00,
+			PRIORITY_HIGH    = 0x01,
+			PRIORITY_MEDIUM  = 0x02,
+			PRIORITY_LOW     = 0x03
+		};
 
     private:
         static const uint8_t CANCTRL_REQOP = 0xE0;
@@ -490,6 +498,7 @@ class MCP2515
         void clearERRIF();
         uint8_t errorCountRX(void);
         uint8_t errorCountTX(void);
+        void setTXPriority(const TXBn txbn, const PRIORITY priority);
 };
 
 #endif

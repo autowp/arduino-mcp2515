@@ -764,3 +764,15 @@ uint8_t MCP2515::errorCountTX(void)
 {
     return readRegister(MCP_TEC);
 }
+
+void MCP2515::setTXPriority(const TXBn txbn, const PRIORITY priority)
+{
+	switch(txbn)
+	{
+		case TXB0:modifyRegister(MCP_TXB0CTRL, TXB_TXP, priority);
+		case TXB1:modifyRegister(MCP_TXB1CTRL, TXB_TXP, priority);
+		case TXB2:modifyRegister(MCP_TXB2CTRL, TXB_TXP, priority);
+		default: break;
+	}
+	
+}
