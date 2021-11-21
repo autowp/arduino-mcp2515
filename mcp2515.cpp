@@ -782,3 +782,24 @@ bool MCP2515::isBusy(const TXBn txbn)
     uint8_t ctrlval = readRegister(txbuf->CTRL);
     return ((ctrlval & TXB_TXREQ) != 0 );
 }
+
+void MCP2515::abortTX(const TXBn txbn)
+{
+    const struct TXBn_REGS *txbuf = &TXB[txbn];
+    modifyRegister(txbuf->CTRL, TXB_TXREQ, 0);
+}
+
+void MCP2515::abortAll()
+{
+    modifyRegister(MCP_CANCTRL, CANCTRL_ABAT, 0);
+}
+
+void MCP2515::enableOneShotMode()
+{
+	modifyRegister(MCP_CANCTRL, CANCTRL_OSM, CANCTRL_OSM);
+}
+
+void MCP2515::disableOneShotMode()
+{
+	modifyRegister(MCP_CANCTRL, CANCTRL_OSM, 0);
+}
