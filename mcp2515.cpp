@@ -778,6 +778,7 @@ void MCP2515::setTXPriority(const TXBn txbn, const PRIORITY priority)
 
 bool MCP2515::isBusy(const TXBn txbn)
 {
+	TXBn txBuffers[N_TXBUFFERS] = {TXB0, TXB1, TXB2};
 	const struct TXBn_REGS *txbuf = &TXB[txBuffers[txbn]];
     uint8_t ctrlval = readRegister(txbuf->CTRL);
     return ((ctrlval & TXB_TXREQ) != 0 );
