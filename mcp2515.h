@@ -499,6 +499,7 @@ class MCP2515
         uint8_t errorCountRX(void);
         uint8_t errorCountTX(void);
         void setTXPriority(const TXBn txbn, const PRIORITY priority);
+        bool isBusy(const TXBn txbn);
 };
 
 #endif

@@ -3,7 +3,7 @@
 
 #define CS_PIN 10
 
-#define MSG_PER_BUFFER 3
+#define MSG_PER_BUFFER 1
 #define TX_BUFFERS 3
 
 MCP2515 mcp2515(CS_PIN);
@@ -12,9 +12,6 @@ struct can_frame msg;
 
 void setup() {
  
-  while (!Serial);
-  Serial.begin(115200);
-  
   mcp2515.reset();
   mcp2515.setBitrate(CAN_125KBPS);
   mcp2515.setConfigMode();
@@ -45,5 +42,7 @@ void loop(){
     msg.data[0] = index++;
     mcp2515.sendMessage(MCP2515::TXB2, &msg);
   }
-  delay(10000);
+  mcp2515.setNormalMode();
+  delay(1000);
+  mcp2515.setListenOnlyMode();
 }

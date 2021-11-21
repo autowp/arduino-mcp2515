@@ -774,5 +774,11 @@ void MCP2515::setTXPriority(const TXBn txbn, const PRIORITY priority)
 		case TXB2:modifyRegister(MCP_TXB2CTRL, TXB_TXP, priority);
 		default: break;
 	}
-	
+}
+
+bool MCP2515::isBusy(const TXBn txbn)
+{
+	const struct TXBn_REGS *txbuf = &TXB[txBuffers[txbn]];
+    uint8_t ctrlval = readRegister(txbuf->CTRL);
+    return ((ctrlval & TXB_TXREQ) != 0 );
 }
