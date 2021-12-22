@@ -443,6 +443,7 @@ class MCP2515
         } RXB[N_RXBUFFERS];
 
         uint8_t SPICS;
+        bool osmFlag = false;
 
     private:
 
@@ -490,6 +491,10 @@ class MCP2515
         void clearERRIF();
         uint8_t errorCountRX(void);
         uint8_t errorCountTX(void);
+
+        // ONE SHOT MODE
+        void enableOSM(void);
+        void disableOSM(void);
 };
 
 #endif
