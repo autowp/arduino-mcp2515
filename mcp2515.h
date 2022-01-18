@@ -424,7 +424,7 @@ class MCP2515
             MCP_RXB1DATA = 0x76
         };
 
-        static const uint32_t SPI_CLOCK = 10000000; // 10MHz
+        static const uint32_t DEFAULT_SPI_CLOCK = 10000000; // 10MHz
 
         static const int N_TXBUFFERS = 3;
         static const int N_RXBUFFERS = 2;
@@ -443,6 +443,7 @@ class MCP2515
         } RXB[N_RXBUFFERS];
 
         uint8_t SPICS;
+        uint32_t SPI_CLOCK;
 
     private:
 
@@ -460,7 +461,7 @@ class MCP2515
         void prepareId(uint8_t *buffer, const bool ext, const uint32_t id);
     
     public:
-        MCP2515(const uint8_t _CS);
+        MCP2515(const uint8_t _CS, const uint32_t _SPI_CLOCK = DEFAULT_SPI_CLOCK);
         ERROR reset(void);
         ERROR setConfigMode();
         ERROR setListenOnlyMode();
