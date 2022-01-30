@@ -32,7 +32,7 @@ void setup() {
   while (!Serial);
   Serial.begin(115200);
   
-  mcp2515.reset();
+  mcp2515.begin();
   mcp2515.setBitrate(CAN_125KBPS);
   mcp2515.setNormalMode();
   
