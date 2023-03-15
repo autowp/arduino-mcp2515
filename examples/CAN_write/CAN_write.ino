@@ -1,10 +1,8 @@
-#include <SPI.h>
 #include <mcp2515.h>
+MCP2515 mcp2515(SS); //Default hardware CS pin (UNO=10, MEGA=53, ESP32=5 etc.)
 
 struct can_frame canMsg1;
 struct can_frame canMsg2;
-MCP2515 mcp2515(10);
-
 
 void setup() {
   canMsg1.can_id  = 0x0F6;
@@ -29,11 +27,11 @@ void setup() {
   canMsg2.data[6] = 0x00;
   canMsg2.data[7] = 0xA0;
   
-  while (!Serial);
   Serial.begin(115200);
+  delay(300);
   
   mcp2515.reset();
-  mcp2515.setBitrate(CAN_125KBPS);
+  mcp2515.setBitrate(CAN_100KBPS); //set the bitrate to your requirements
   mcp2515.setNormalMode();
   
   Serial.println("Example: Write to CAN");
