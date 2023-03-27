@@ -30,7 +30,10 @@ void setup() {
   Serial.begin(115200);
   delay(300);
   
-  mcp2515.reset();
+  while (mcp2515.reset() != MCP2515::ERROR_OK) {
+    Serial.println("MCP2515 init failure!");
+  }
+  
   mcp2515.setBitrate(CAN_100KBPS); //set the bitrate to your requirements
   mcp2515.setNormalMode();
   
