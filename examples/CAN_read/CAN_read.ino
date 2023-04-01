@@ -43,7 +43,9 @@ void loop() {
     Serial.print(debug_time); // print the time since the last message
     Serial.print(" | ");
     
-    Serial.print(canMsg.can_id, HEX); // print ID
+    char can_id[4];
+    snprintf(can_id, 4, "%03lX", canMsg.can_id);
+    Serial.print(can_id); // print ID
     Serial.print(" | ");
     
     for (int i = 0; i < canMsg.can_dlc; i++)  {  // print the data
