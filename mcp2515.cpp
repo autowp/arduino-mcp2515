@@ -12,20 +12,24 @@ const struct MCP2515::RXBn_REGS MCP2515::RXB[N_RXBUFFERS] = {
     {MCP_RXB1CTRL, MCP_RXB1SIDH, MCP_RXB1DATA, CANINTF_RX1IF}
 };
 
-MCP2515::MCP2515(const uint8_t _CS, const uint32_t _SPI_CLOCK, SPIClass * _SPI)
-{
-    if (_SPI != nullptr) {
-        SPIn = _SPI;
-    }
-    else {
-        SPIn = &SPI;
-        SPIn->begin();
-    }
+MCP2515::MCP2515(const uint8_t _CS, const uint32_t _SPI_CLOCK, SPIClass *_SPI) {
+  if (_SPI != nullptr) { // It maintains compatibility with old sketches.
+    begin(_SPI);
+  }
+  SPICS = _CS;
+  SPI_CLOCK = _SPI_CLOCK;
+}
 
-    SPICS = _CS;
-    SPI_CLOCK = _SPI_CLOCK;
-    pinMode(SPICS, OUTPUT);
-    endSPI();
+bool MCP2515::begin(SPIClass *_SPI) {
+  if (_SPI != nullptr) {
+    SPIn = _SPI;
+  } else {
+    SPIn = &SPI;
+    SPIn->begin();
+  }
+  pinMode(SPICS, OUTPUT);
+  endSPI();
+  return true;
 }
 
 void MCP2515::startSPI() {
