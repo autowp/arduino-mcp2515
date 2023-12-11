@@ -3,7 +3,7 @@ Arduino MCP2515 CAN interface library
 [![Build Status](https://travis-ci.org/autowp/arduino-mcp2515.svg?branch=master)](https://travis-ci.org/autowp/arduino-mcp2515)
 
 <br>
-CAN-BUS is a common industrial bus because of its long travel distance, medium communication speed and high reliability. It is commonly found on modern machine tools and as an automotive diagnostic bus. This CAN-BUS Shield gives your Arduino/Seeeduino CAN-BUS capibility. With an OBD-II converter cable added on and the OBD-II library imported, you are ready to build an onboard diagnostic device or data logger.
+CAN-BUS is a common industrial bus because of its long travel distance, medium communication speed and high reliability. It is commonly found on modern machine tools and as an automotive diagnostic bus. This CAN-BUS Shield gives your Arduino/Seeeduino CAN-BUS capability. With an OBD-II converter cable added on and the OBD-II library imported, you are ready to build an onboard diagnostic device or data logger.
 
 - Implements CAN V2.0B at up to 1 Mb/s
 - SPI Interface up to 10 MHz
@@ -183,7 +183,7 @@ MCP2515::ERROR readMessage(struct can_frame *frame);
 
 In conditions that masks and filters have been set. This function can only get frames that meet the requirements of masks and filters.
 
-You can choise one of two method to receive: interrupt-based and polling
+You can choose one of two method to receive: interrupt-based and polling
 
 Example of poll read
 
@@ -236,7 +236,7 @@ void loop() {
 
 ## Set Receive Mask and Filter
 
-There are 2 receive mask registers and 5 filter registers on the controller chip that guarantee you get data from the target device. They are useful especially in a large network consisting of numerous nodes.
+There are 2 receive mask registers and 5 filter registers on the controller chip that guarantee you get data from the target device. They are useful, especially in a large network consisting of numerous nodes.
 
 We provide two functions for you to utilize these mask and filter registers. They are:
 
