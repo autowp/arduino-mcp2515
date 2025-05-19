@@ -361,6 +361,7 @@ class MCP2515
             MCP_RXF2SIDL = 0x09,
             MCP_RXF2EID8 = 0x0A,
             MCP_RXF2EID0 = 0x0B,
+        MCP_BFPCTRL = 0x0C, // RXnBF PIN CONTROL AND STATUS
             MCP_CANSTAT  = 0x0E,
             MCP_CANCTRL  = 0x0F,
             MCP_RXF3SIDH = 0x10,
@@ -487,6 +488,7 @@ class MCP2515
         bool checkError(void);
         uint8_t getErrorFlags(void);
         void clearRXnOVRFlags(void);
+    void clearReceiveBufferFull(void);
         uint8_t getInterrupts(void);
         uint8_t getInterruptMask(void);
         void clearInterrupts(void);

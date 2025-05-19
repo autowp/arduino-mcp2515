@@ -730,6 +730,11 @@ uint8_t MCP2515::getInterrupts(void)
     return readRegister(MCP_CANINTF);
 }
 
+void MCP2515::clearReceiveBufferFull(void)
+{
+    setRegister(MCP_BFPCTRL, 0);
+}
+
 void MCP2515::clearInterrupts(void)
 {
     setRegister(MCP_CANINTF, 0);
