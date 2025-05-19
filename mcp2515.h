@@ -449,6 +449,7 @@ class MCP2515
         uint8_t SPICS;
         uint32_t SPI_CLOCK;
         SPIClass * SPIn;
+        uint8_t mcp2515_rx_index = 0;
 
     private:
 

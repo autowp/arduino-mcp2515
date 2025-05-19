@@ -671,8 +671,6 @@ MCP2515::ERROR MCP2515::readMessage(const RXBn rxbn, struct can_frame *frame)
 
     readRegisters(rxb->DATA, frame->data, dlc);
 
-    modifyRegister(MCP_CANINTF, rxb->CANINTF_RXnIF, 0);
-
     return ERROR_OK;
 }
 
@@ -681,10 +679,14 @@ MCP2515::ERROR MCP2515::readMessage(struct can_frame *frame)
     ERROR rc;
     uint8_t stat = getStatus();
 
-    if ( stat & STAT_RX0IF ) {
+    if ( stat & STAT_RX0IF && mcp2515_rx_index == 0 ) {
         rc = readMessage(RXB0, frame);
+        if ( stat & STAT_RX1IF ) mcp2515_rx_index = 1;
+        modifyRegister(MCP_CANINTF, RXB[RXB0].CANINTF_RXnIF, 0);
     } else if ( stat & STAT_RX1IF ) {
-        rc = readMessage(RXB1, frame);
+        rc = readMessage( RXB1, frame );
+        mcp2515_rx_index = 0;
+        modifyRegister(MCP_CANINTF, RXB[RXB1].CANINTF_RXnIF, 0);
     } else {
         rc = ERROR_NOMSG;
     }
