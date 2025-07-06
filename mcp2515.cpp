@@ -26,6 +26,7 @@ MCP2515::MCP2515(const uint8_t _CS, const uint32_t _SPI_CLOCK, SPIClass * _SPI)
     SPI_CLOCK = _SPI_CLOCK;
     pinMode(SPICS, OUTPUT);
     digitalWrite(SPICS, HIGH);
+    OSMflag = false;
 }
 
 void MCP2515::startSPI() {
@@ -179,7 +180,7 @@ MCP2515::ERROR MCP2515::setNormalMode()
 
 MCP2515::ERROR MCP2515::setMode(const CANCTRL_REQOP_MODE mode)
 {
-    modifyRegister(MCP_CANCTRL, CANCTRL_REQOP, mode);
+    modifyRegister(MCP_CANCTRL, CANCTRL_REQOP | CANCTRL_OSM, OSMflag ? mode | CANCTRL_OSM : mode & ~(CANCTRL_OSM));
 
     unsigned long endTime = millis() + 10;
     bool modeMatch = false;
@@ -776,4 +777,14 @@ uint8_t MCP2515::errorCountRX(void)
 uint8_t MCP2515::errorCountTX(void)                             
 {
     return readRegister(MCP_TEC);
+}
+
+// these merely set the OSM flag
+// setMode(...) or the other setXxxxMode() i.e: setNormalMode() must be called afterwards to set the correct mode with OSM
+void MCP2515::enableOSM(void) {
+    OSMflag = true;
+}
+
+void MCP2515::disableOSM(void) {
+    OSMflag = false;
 }
