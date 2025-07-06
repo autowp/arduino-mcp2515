@@ -449,6 +449,7 @@ class MCP2515
         uint8_t SPICS;
         uint32_t SPI_CLOCK;
         SPIClass * SPIn;
+        bool OSMflag;
 
     private:
 
@@ -496,6 +497,8 @@ class MCP2515
         void clearERRIF();
         uint8_t errorCountRX(void);
         uint8_t errorCountTX(void);
+        void enableOSM(void);
+        void disableOSM(void);
 };
 
 #endif
