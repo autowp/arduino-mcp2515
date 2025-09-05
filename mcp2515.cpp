@@ -210,291 +210,45 @@ MCP2515::ERROR MCP2515::setBitrate(const CAN_SPEED canSpeed, CAN_CLOCK canClock)
         return error;
     }
 
-    uint8_t set, cfg1, cfg2, cfg3;
-    set = 1;
-    switch (canClock)
+    struct {
+        CAN_CLOCK canClock;
+        CAN_SPEED canSpeed;
+        uint8_t cfg1, cfg2, cfg3;
+    } setting[] = 
     {
-        case (MCP_8MHZ):
-        switch (canSpeed)
+                         /*             8MHz Clock Settings           */   /*          16MHz Clock Settings             */   /*            20MHz Clock Settings           */
+        /*   5 KBPS    */ { MCP_8MHZ, CAN_5KBPS,     0x1F, 0xBF, 0x87 },    { MCP_16MHZ, CAN_5KBPS,    0x3F, 0xFF, 0x87 },                                                    /*   5 KBPS    */
+        /*  10 KBPS    */ { MCP_8MHZ, CAN_10KBPS,    0x0F, 0xBF, 0x87 },    { MCP_16MHZ, CAN_10KBPS,   0x1F, 0xFF, 0x87 },                                                    /*  10 KBPS    */
+        /*  20 KBPS    */ { MCP_8MHZ, CAN_20KBPS,    0x07, 0xBF, 0x87 },    { MCP_16MHZ, CAN_20KBPS,   0x0F, 0xFF, 0x87 },                                                    /*  20 KBPS    */
+        /*  31.25 KBPS */ { MCP_8MHZ, CAN_31K25BPS,  0x07, 0xA4, 0x84 },                                                                                                      /*  31.25 KBPS */
+        /*  33 KBPS    */ { MCP_8MHZ, CAN_33KBPS,    0x47, 0xE2, 0x85 },    { MCP_16MHZ, CAN_33KBPS,   0x4E, 0xF1, 0x85 },    { MCP_20MHZ, CAN_33KBPS,   0x0B, 0xFF, 0x87 },  /*  33 KBPS    */
+        /*  40 KBPS    */ { MCP_8MHZ, CAN_40KBPS,    0x03, 0xBF, 0x87 },    { MCP_16MHZ, CAN_40KBPS,   0x07, 0xFF, 0x87 },    { MCP_20MHZ, CAN_40KBPS,   0x09, 0xFF, 0x87 },  /*  40 KBPS    */
+        /*  50 KBPS    */ { MCP_8MHZ, CAN_50KBPS,    0x03, 0xB4, 0x86 },    { MCP_16MHZ, CAN_50KBPS,   0x07, 0xFA, 0x87 },    { MCP_20MHZ, CAN_50KBPS,   0x09, 0xFA, 0x87 },  /*  50 KBPS    */
+        /*  80 KBPS    */ { MCP_8MHZ, CAN_80KBPS,    0x01, 0xBF, 0x87 },    { MCP_16MHZ, CAN_80KBPS,   0x03, 0xFF, 0x87 },    { MCP_20MHZ, CAN_80KBPS,   0x04, 0xFF, 0x87 },  /*  80 KBPS    */
+        /*  83.3 KBPS  */                                                   { MCP_16MHZ, CAN_83K3BPS,  0x03, 0xBE, 0x07 },    { MCP_20MHZ, CAN_83K3BPS,  0x04, 0xFE, 0x87 },  /*  83.3 KBPS  */
+        /*  95 KBPS    */                                                   { MCP_16MHZ, CAN_95KBPS,   0x03, 0xAD, 0x07 },                                                    /*  95 KBPS    */
+        /* 100 KBPS    */ { MCP_8MHZ, CAN_100KBPS,   0x01, 0xB4, 0x86 },    { MCP_16MHZ, CAN_100KBPS,  0x03, 0xFA, 0x87 },    { MCP_20MHZ, CAN_100KBPS,  0x04, 0xFA, 0x87 },  /* 100 KBPS    */
+        /* 125 KBPS    */ { MCP_8MHZ, CAN_125KBPS,   0x01, 0xB1, 0x85 },    { MCP_16MHZ, CAN_125KBPS,  0x03, 0xF0, 0x86 },    { MCP_20MHZ, CAN_125KBPS,  0x03, 0xFA, 0x87 },  /* 125 KBPS    */
+        /* 200 KBPS    */ { MCP_8MHZ, CAN_200KBPS,   0x00, 0xB4, 0x86 },    { MCP_16MHZ, CAN_200KBPS,  0x01, 0xFA, 0x87 },    { MCP_20MHZ, CAN_200KBPS,  0x01, 0xFF, 0x87 },  /* 200 KBPS    */
+        /* 250 KBPS    */ { MCP_8MHZ, CAN_250KBPS,   0x00, 0xB1, 0x85 },    { MCP_16MHZ, CAN_250KBPS,  0x41, 0xF1, 0x85 },    { MCP_20MHZ, CAN_250KBPS,  0x41, 0xFB, 0x86 },  /* 250 KBPS    */
+        /* 500 KBPS    */ { MCP_8MHZ, CAN_500KBPS,   0x00, 0x90, 0x82 },    { MCP_16MHZ, CAN_500KBPS,  0x00, 0xF0, 0x86 },    { MCP_20MHZ, CAN_500KBPS,  0x00, 0xFA, 0x87 },  /* 500 KBPS    */
+        /* 1 MBPS      */ { MCP_8MHZ, CAN_1000KBPS,  0x00, 0x80, 0x80 },    { MCP_16MHZ, CAN_1000KBPS, 0x00, 0xD0, 0x82 },    { MCP_20MHZ, CAN_1000KBPS, 0x00, 0xD9, 0x82 },  /* 1 MBPS      */
+    };
+
+    bool set = false; // The config values are not set
+    for( int i=0; i < sizeof(setting)/sizeof(setting[0]); ++i )
+    {
+        if ( (canSpeed == setting[i].canSpeed) && (canClock == setting[i].canClock) )
         {
-            case (CAN_5KBPS):                                               //   5KBPS
-            cfg1 = MCP_8MHz_5kBPS_CFG1;
-            cfg2 = MCP_8MHz_5kBPS_CFG2;
-            cfg3 = MCP_8MHz_5kBPS_CFG3;
-            break;
-
-            case (CAN_10KBPS):                                              //  10KBPS
-            cfg1 = MCP_8MHz_10kBPS_CFG1;
-            cfg2 = MCP_8MHz_10kBPS_CFG2;
-            cfg3 = MCP_8MHz_10kBPS_CFG3;
-            break;
-
-            case (CAN_20KBPS):                                              //  20KBPS
-            cfg1 = MCP_8MHz_20kBPS_CFG1;
-            cfg2 = MCP_8MHz_20kBPS_CFG2;
-            cfg3 = MCP_8MHz_20kBPS_CFG3;
-            break;
-
-            case (CAN_31K25BPS):                                            //  31.25KBPS
-            cfg1 = MCP_8MHz_31k25BPS_CFG1;
-            cfg2 = MCP_8MHz_31k25BPS_CFG2;
-            cfg3 = MCP_8MHz_31k25BPS_CFG3;
-            break;
-
-            case (CAN_33KBPS):                                              //  33.333KBPS
-            cfg1 = MCP_8MHz_33k3BPS_CFG1;
-            cfg2 = MCP_8MHz_33k3BPS_CFG2;
-            cfg3 = MCP_8MHz_33k3BPS_CFG3;
-            break;
-
-            case (CAN_40KBPS):                                              //  40Kbps
-            cfg1 = MCP_8MHz_40kBPS_CFG1;
-            cfg2 = MCP_8MHz_40kBPS_CFG2;
-            cfg3 = MCP_8MHz_40kBPS_CFG3;
-            break;
-
-            case (CAN_50KBPS):                                              //  50Kbps
-            cfg1 = MCP_8MHz_50kBPS_CFG1;
-            cfg2 = MCP_8MHz_50kBPS_CFG2;
-            cfg3 = MCP_8MHz_50kBPS_CFG3;
-            break;
-
-            case (CAN_80KBPS):                                              //  80Kbps
-            cfg1 = MCP_8MHz_80kBPS_CFG1;
-            cfg2 = MCP_8MHz_80kBPS_CFG2;
-            cfg3 = MCP_8MHz_80kBPS_CFG3;
-            break;
-
-            case (CAN_100KBPS):                                             // 100Kbps
-            cfg1 = MCP_8MHz_100kBPS_CFG1;
-            cfg2 = MCP_8MHz_100kBPS_CFG2;
-            cfg3 = MCP_8MHz_100kBPS_CFG3;
-            break;
-
-            case (CAN_125KBPS):                                             // 125Kbps
-            cfg1 = MCP_8MHz_125kBPS_CFG1;
-            cfg2 = MCP_8MHz_125kBPS_CFG2;
-            cfg3 = MCP_8MHz_125kBPS_CFG3;
-            break;
-
-            case (CAN_200KBPS):                                             // 200Kbps
-            cfg1 = MCP_8MHz_200kBPS_CFG1;
-            cfg2 = MCP_8MHz_200kBPS_CFG2;
-            cfg3 = MCP_8MHz_200kBPS_CFG3;
-            break;
-
-            case (CAN_250KBPS):                                             // 250Kbps
-            cfg1 = MCP_8MHz_250kBPS_CFG1;
-            cfg2 = MCP_8MHz_250kBPS_CFG2;
-            cfg3 = MCP_8MHz_250kBPS_CFG3;
-            break;
-
-            case (CAN_500KBPS):                                             // 500Kbps
-            cfg1 = MCP_8MHz_500kBPS_CFG1;
-            cfg2 = MCP_8MHz_500kBPS_CFG2;
-            cfg3 = MCP_8MHz_500kBPS_CFG3;
-            break;
-
-            case (CAN_1000KBPS):                                            //   1Mbps
-            cfg1 = MCP_8MHz_1000kBPS_CFG1;
-            cfg2 = MCP_8MHz_1000kBPS_CFG2;
-            cfg3 = MCP_8MHz_1000kBPS_CFG3;
-            break;
-
-            default:
-            set = 0;
+            setRegister(MCP_CNF1, setting[i].cfg1);
+            setRegister(MCP_CNF2, setting[i].cfg2);
+            setRegister(MCP_CNF3, setting[i].cfg3);
+            set = true;
             break;
         }
-        break;
-
-        case (MCP_16MHZ):
-        switch (canSpeed)
-        {
-            case (CAN_5KBPS):                                               //   5Kbps
-            cfg1 = MCP_16MHz_5kBPS_CFG1;
-            cfg2 = MCP_16MHz_5kBPS_CFG2;
-            cfg3 = MCP_16MHz_5kBPS_CFG3;
-            break;
-
-            case (CAN_10KBPS):                                              //  10Kbps
-            cfg1 = MCP_16MHz_10kBPS_CFG1;
-            cfg2 = MCP_16MHz_10kBPS_CFG2;
-            cfg3 = MCP_16MHz_10kBPS_CFG3;
-            break;
-
-            case (CAN_20KBPS):                                              //  20Kbps
-            cfg1 = MCP_16MHz_20kBPS_CFG1;
-            cfg2 = MCP_16MHz_20kBPS_CFG2;
-            cfg3 = MCP_16MHz_20kBPS_CFG3;
-            break;
-
-            case (CAN_33KBPS):                                              //  33.333Kbps
-            cfg1 = MCP_16MHz_33k3BPS_CFG1;
-            cfg2 = MCP_16MHz_33k3BPS_CFG2;
-            cfg3 = MCP_16MHz_33k3BPS_CFG3;
-            break;
-
-            case (CAN_40KBPS):                                              //  40Kbps
-            cfg1 = MCP_16MHz_40kBPS_CFG1;
-            cfg2 = MCP_16MHz_40kBPS_CFG2;
-            cfg3 = MCP_16MHz_40kBPS_CFG3;
-            break;
-
-            case (CAN_50KBPS):                                              //  50Kbps
-            cfg1 = MCP_16MHz_50kBPS_CFG1;
-            cfg2 = MCP_16MHz_50kBPS_CFG2;
-            cfg3 = MCP_16MHz_50kBPS_CFG3;
-            break;
-
-            case (CAN_80KBPS):                                              //  80Kbps
-            cfg1 = MCP_16MHz_80kBPS_CFG1;
-            cfg2 = MCP_16MHz_80kBPS_CFG2;
-            cfg3 = MCP_16MHz_80kBPS_CFG3;
-            break;
-
-            case (CAN_83K3BPS):                                             //  83.333Kbps
-            cfg1 = MCP_16MHz_83k3BPS_CFG1;
-            cfg2 = MCP_16MHz_83k3BPS_CFG2;
-            cfg3 = MCP_16MHz_83k3BPS_CFG3;
-            break;
-
-            case (CAN_95KBPS):                                              //  95Kbps
-            cfg1 = MCP_16MHz_95kBPS_CFG1;
-            cfg2 = MCP_16MHz_95kBPS_CFG2;
-            cfg3 = MCP_16MHz_95kBPS_CFG3;
-            break;
-
-            case (CAN_100KBPS):                                             // 100Kbps
-            cfg1 = MCP_16MHz_100kBPS_CFG1;
-            cfg2 = MCP_16MHz_100kBPS_CFG2;
-            cfg3 = MCP_16MHz_100kBPS_CFG3;
-            break;
-
-            case (CAN_125KBPS):                                             // 125Kbps
-            cfg1 = MCP_16MHz_125kBPS_CFG1;
-            cfg2 = MCP_16MHz_125kBPS_CFG2;
-            cfg3 = MCP_16MHz_125kBPS_CFG3;
-            break;
-
-            case (CAN_200KBPS):                                             // 200Kbps
-            cfg1 = MCP_16MHz_200kBPS_CFG1;
-            cfg2 = MCP_16MHz_200kBPS_CFG2;
-            cfg3 = MCP_16MHz_200kBPS_CFG3;
-            break;
-
-            case (CAN_250KBPS):                                             // 250Kbps
-            cfg1 = MCP_16MHz_250kBPS_CFG1;
-            cfg2 = MCP_16MHz_250kBPS_CFG2;
-            cfg3 = MCP_16MHz_250kBPS_CFG3;
-            break;
-
-            case (CAN_500KBPS):                                             // 500Kbps
-            cfg1 = MCP_16MHz_500kBPS_CFG1;
-            cfg2 = MCP_16MHz_500kBPS_CFG2;
-            cfg3 = MCP_16MHz_500kBPS_CFG3;
-            break;
-
-            case (CAN_1000KBPS):                                            //   1Mbps
-            cfg1 = MCP_16MHz_1000kBPS_CFG1;
-            cfg2 = MCP_16MHz_1000kBPS_CFG2;
-            cfg3 = MCP_16MHz_1000kBPS_CFG3;
-            break;
-
-            default:
-            set = 0;
-            break;
-        }
-        break;
-
-        case (MCP_20MHZ):
-        switch (canSpeed)
-        {
-            case (CAN_33KBPS):                                              //  33.333Kbps
-            cfg1 = MCP_20MHz_33k3BPS_CFG1;
-            cfg2 = MCP_20MHz_33k3BPS_CFG2;
-            cfg3 = MCP_20MHz_33k3BPS_CFG3;
-	    break;
-
-            case (CAN_40KBPS):                                              //  40Kbps
-            cfg1 = MCP_20MHz_40kBPS_CFG1;
-            cfg2 = MCP_20MHz_40kBPS_CFG2;
-            cfg3 = MCP_20MHz_40kBPS_CFG3;
-            break;
-
-            case (CAN_50KBPS):                                              //  50Kbps
-            cfg1 = MCP_20MHz_50kBPS_CFG1;
-            cfg2 = MCP_20MHz_50kBPS_CFG2;
-            cfg3 = MCP_20MHz_50kBPS_CFG3;
-            break;
-
-            case (CAN_80KBPS):                                              //  80Kbps
-            cfg1 = MCP_20MHz_80kBPS_CFG1;
-            cfg2 = MCP_20MHz_80kBPS_CFG2;
-            cfg3 = MCP_20MHz_80kBPS_CFG3;
-            break;
-
-            case (CAN_83K3BPS):                                             //  83.333Kbps
-            cfg1 = MCP_20MHz_83k3BPS_CFG1;
-            cfg2 = MCP_20MHz_83k3BPS_CFG2;
-            cfg3 = MCP_20MHz_83k3BPS_CFG3;
-	    break;
-
-            case (CAN_100KBPS):                                             // 100Kbps
-            cfg1 = MCP_20MHz_100kBPS_CFG1;
-            cfg2 = MCP_20MHz_100kBPS_CFG2;
-            cfg3 = MCP_20MHz_100kBPS_CFG3;
-            break;
-
-            case (CAN_125KBPS):                                             // 125Kbps
-            cfg1 = MCP_20MHz_125kBPS_CFG1;
-            cfg2 = MCP_20MHz_125kBPS_CFG2;
-            cfg3 = MCP_20MHz_125kBPS_CFG3;
-            break;
-
-            case (CAN_200KBPS):                                             // 200Kbps
-            cfg1 = MCP_20MHz_200kBPS_CFG1;
-            cfg2 = MCP_20MHz_200kBPS_CFG2;
-            cfg3 = MCP_20MHz_200kBPS_CFG3;
-            break;
-
-            case (CAN_250KBPS):                                             // 250Kbps
-            cfg1 = MCP_20MHz_250kBPS_CFG1;
-            cfg2 = MCP_20MHz_250kBPS_CFG2;
-            cfg3 = MCP_20MHz_250kBPS_CFG3;
-            break;
-
-            case (CAN_500KBPS):                                             // 500Kbps
-            cfg1 = MCP_20MHz_500kBPS_CFG1;
-            cfg2 = MCP_20MHz_500kBPS_CFG2;
-            cfg3 = MCP_20MHz_500kBPS_CFG3;
-            break;
-
-            case (CAN_1000KBPS):                                            //   1Mbps
-            cfg1 = MCP_20MHz_1000kBPS_CFG1;
-            cfg2 = MCP_20MHz_1000kBPS_CFG2;
-            cfg3 = MCP_20MHz_1000kBPS_CFG3;
-            break;
-
-            default:
-            set = 0;
-            break;
-        }
-        break;
-
-        default:
-        set = 0;
-        break;
     }
 
-    if (set) {
-        setRegister(MCP_CNF1, cfg1);
-        setRegister(MCP_CNF2, cfg2);
-        setRegister(MCP_CNF3, cfg3);
-        return ERROR_OK;
-    }
-    else {
-        return ERROR_FAIL;
-    }
+    return set? ERROR_OK : ERROR_FAIL;
 }
 
 MCP2515::ERROR MCP2515::setClkOut(const CAN_CLKOUT divisor)
