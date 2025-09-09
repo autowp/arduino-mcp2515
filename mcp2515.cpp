@@ -195,7 +195,6 @@ MCP2515::ERROR MCP2515::setMode(const CANCTRL_REQOP_MODE mode)
     }
 
     return modeMatch ? ERROR_OK : ERROR_FAIL;
-
 }
 
 MCP2515::ERROR MCP2515::setBitrate(const CAN_SPEED canSpeed)
@@ -203,49 +202,46 @@ MCP2515::ERROR MCP2515::setBitrate(const CAN_SPEED canSpeed)
     return setBitrate(canSpeed, MCP_16MHZ);
 }
 
-MCP2515::ERROR MCP2515::setBitrate(const CAN_SPEED canSpeed, CAN_CLOCK canClock)
+MCP2515::ERROR MCP2515::setBitrate(const CAN_SPEED canSpeed, const CAN_CLOCK canClock)
 {
+    /* For CNF1, see Register 5-1 on Page 44 of the MCP2515 datasheet */
+    /* For CNF2, see Register 5-2 on Page 44 of the MCP2515 datasheet */
+    /* For CNF3, see Register 5-3 on Page 45 of the MCP2515 datasheet */
+
+    struct {
+        uint8_t cnf1, cnf2, cnf3;
+    } setting[][3] = {
+          /*      20MHz      */ /*      16MHz     */  /*      8MHz      */
+        { { 0x00, 0x00, 0x00 }, { 0x3F, 0xFF, 0x87 }, { 0x1F, 0xBF, 0x87 }, }, /*   5 KBPS    */
+        { { 0x00, 0x00, 0x00 }, { 0x1F, 0xFF, 0x87 }, { 0x0F, 0xBF, 0x87 }, }, /*  10 KBPS    */
+        { { 0x00, 0x00, 0x00 }, { 0x0F, 0xFF, 0x87 }, { 0x07, 0xBF, 0x87 }, }, /*  20 KBPS    */
+        { { 0x00, 0x00, 0x00 }, { 0x00, 0x00, 0x00 }, { 0x07, 0xA4, 0x84 }, }, /*  31.25 KBPS */
+        { { 0x0B, 0xFF, 0x87 }, { 0x4E, 0xF1, 0x85 }, { 0x47, 0xE2, 0x85 }, }, /*  33 KBPS    */
+        { { 0x09, 0xFF, 0x87 }, { 0x07, 0xFF, 0x87 }, { 0x03, 0xBF, 0x87 }, }, /*  40 KBPS    */
+        { { 0x09, 0xFA, 0x87 }, { 0x07, 0xFA, 0x87 }, { 0x03, 0xB4, 0x86 }, }, /*  50 KBPS    */
+        { { 0x04, 0xFF, 0x87 }, { 0x03, 0xFF, 0x87 }, { 0x01, 0xBF, 0x87 }, }, /*  80 KBPS    */
+        { { 0x04, 0xFE, 0x87 }, { 0x03, 0xBE, 0x07 }, { 0x00, 0x00, 0x00 }, }, /*  83.3 KBPS  */
+        { { 0x00, 0x00, 0x00 }, { 0x03, 0xAD, 0x07 }, { 0x00, 0x00, 0x00 }, }, /*  95 KBPS    */
+        { { 0x04, 0xFA, 0x87 }, { 0x03, 0xFA, 0x87 }, { 0x01, 0xB4, 0x86 }, }, /* 100 KBPS    */
+        { { 0x03, 0xFA, 0x87 }, { 0x03, 0xF0, 0x86 }, { 0x01, 0xB1, 0x85 }, }, /* 125 KBPS    */
+        { { 0x01, 0xFF, 0x87 }, { 0x01, 0xFA, 0x87 }, { 0x00, 0xB4, 0x86 }, }, /* 200 KBPS    */
+        { { 0x41, 0xFB, 0x86 }, { 0x41, 0xF1, 0x85 }, { 0x00, 0xB1, 0x85 }, }, /* 250 KBPS    */
+        { { 0x00, 0xFA, 0x87 }, { 0x00, 0xF0, 0x86 }, { 0x00, 0x90, 0x82 }, }, /* 500 KBPS    */
+        { { 0x00, 0xD9, 0x82 }, { 0x00, 0xD0, 0x82 }, { 0x00, 0x80, 0x80 }, }, /* 1 MBPS      */
+    };
+
     ERROR error = setConfigMode();
     if (error != ERROR_OK) {
         return error;
     }
 
-    struct {
-        CAN_CLOCK canClock;
-        CAN_SPEED canSpeed;
-        uint8_t cfg1, cfg2, cfg3;
-    } setting[] = 
-    {
-                         /*             8MHz Clock Settings           */   /*          16MHz Clock Settings             */   /*            20MHz Clock Settings           */
-        /*   5 KBPS    */ { MCP_8MHZ, CAN_5KBPS,     0x1F, 0xBF, 0x87 },    { MCP_16MHZ, CAN_5KBPS,    0x3F, 0xFF, 0x87 },                                                    /*   5 KBPS    */
-        /*  10 KBPS    */ { MCP_8MHZ, CAN_10KBPS,    0x0F, 0xBF, 0x87 },    { MCP_16MHZ, CAN_10KBPS,   0x1F, 0xFF, 0x87 },                                                    /*  10 KBPS    */
-        /*  20 KBPS    */ { MCP_8MHZ, CAN_20KBPS,    0x07, 0xBF, 0x87 },    { MCP_16MHZ, CAN_20KBPS,   0x0F, 0xFF, 0x87 },                                                    /*  20 KBPS    */
-        /*  31.25 KBPS */ { MCP_8MHZ, CAN_31K25BPS,  0x07, 0xA4, 0x84 },                                                                                                      /*  31.25 KBPS */
-        /*  33 KBPS    */ { MCP_8MHZ, CAN_33KBPS,    0x47, 0xE2, 0x85 },    { MCP_16MHZ, CAN_33KBPS,   0x4E, 0xF1, 0x85 },    { MCP_20MHZ, CAN_33KBPS,   0x0B, 0xFF, 0x87 },  /*  33 KBPS    */
-        /*  40 KBPS    */ { MCP_8MHZ, CAN_40KBPS,    0x03, 0xBF, 0x87 },    { MCP_16MHZ, CAN_40KBPS,   0x07, 0xFF, 0x87 },    { MCP_20MHZ, CAN_40KBPS,   0x09, 0xFF, 0x87 },  /*  40 KBPS    */
-        /*  50 KBPS    */ { MCP_8MHZ, CAN_50KBPS,    0x03, 0xB4, 0x86 },    { MCP_16MHZ, CAN_50KBPS,   0x07, 0xFA, 0x87 },    { MCP_20MHZ, CAN_50KBPS,   0x09, 0xFA, 0x87 },  /*  50 KBPS    */
-        /*  80 KBPS    */ { MCP_8MHZ, CAN_80KBPS,    0x01, 0xBF, 0x87 },    { MCP_16MHZ, CAN_80KBPS,   0x03, 0xFF, 0x87 },    { MCP_20MHZ, CAN_80KBPS,   0x04, 0xFF, 0x87 },  /*  80 KBPS    */
-        /*  83.3 KBPS  */                                                   { MCP_16MHZ, CAN_83K3BPS,  0x03, 0xBE, 0x07 },    { MCP_20MHZ, CAN_83K3BPS,  0x04, 0xFE, 0x87 },  /*  83.3 KBPS  */
-        /*  95 KBPS    */                                                   { MCP_16MHZ, CAN_95KBPS,   0x03, 0xAD, 0x07 },                                                    /*  95 KBPS    */
-        /* 100 KBPS    */ { MCP_8MHZ, CAN_100KBPS,   0x01, 0xB4, 0x86 },    { MCP_16MHZ, CAN_100KBPS,  0x03, 0xFA, 0x87 },    { MCP_20MHZ, CAN_100KBPS,  0x04, 0xFA, 0x87 },  /* 100 KBPS    */
-        /* 125 KBPS    */ { MCP_8MHZ, CAN_125KBPS,   0x01, 0xB1, 0x85 },    { MCP_16MHZ, CAN_125KBPS,  0x03, 0xF0, 0x86 },    { MCP_20MHZ, CAN_125KBPS,  0x03, 0xFA, 0x87 },  /* 125 KBPS    */
-        /* 200 KBPS    */ { MCP_8MHZ, CAN_200KBPS,   0x00, 0xB4, 0x86 },    { MCP_16MHZ, CAN_200KBPS,  0x01, 0xFA, 0x87 },    { MCP_20MHZ, CAN_200KBPS,  0x01, 0xFF, 0x87 },  /* 200 KBPS    */
-        /* 250 KBPS    */ { MCP_8MHZ, CAN_250KBPS,   0x00, 0xB1, 0x85 },    { MCP_16MHZ, CAN_250KBPS,  0x41, 0xF1, 0x85 },    { MCP_20MHZ, CAN_250KBPS,  0x41, 0xFB, 0x86 },  /* 250 KBPS    */
-        /* 500 KBPS    */ { MCP_8MHZ, CAN_500KBPS,   0x00, 0x90, 0x82 },    { MCP_16MHZ, CAN_500KBPS,  0x00, 0xF0, 0x86 },    { MCP_20MHZ, CAN_500KBPS,  0x00, 0xFA, 0x87 },  /* 500 KBPS    */
-        /* 1 MBPS      */ { MCP_8MHZ, CAN_1000KBPS,  0x00, 0x80, 0x80 },    { MCP_16MHZ, CAN_1000KBPS, 0x00, 0xD0, 0x82 },    { MCP_20MHZ, CAN_1000KBPS, 0x00, 0xD9, 0x82 },  /* 1 MBPS      */
-    };
-
-    bool set = false; // The config values are not set
-    for( int i=0; i < sizeof(setting)/sizeof(setting[0]); ++i )
-    {
-        if ( (canSpeed == setting[i].canSpeed) && (canClock == setting[i].canClock) )
-        {
-            setRegister(MCP_CNF1, setting[i].cfg1);
-            setRegister(MCP_CNF2, setting[i].cfg2);
-            setRegister(MCP_CNF3, setting[i].cfg3);
-            set = true;
-            break;
-        }
+    // If cnf2 is 0, that indicates an invalid setting, and will return ERROR_FAIL
+    // Note that cnf1 can properly be 0.
+    bool set = !!setting[canSpeed][canClock].cnf2;
+    if ( set  ) {
+        setRegister(MCP_CNF1, setting[canSpeed][canClock].cnf1);
+        setRegister(MCP_CNF2, setting[canSpeed][canClock].cnf2);
+        setRegister(MCP_CNF3, setting[canSpeed][canClock].cnf3);
     }
 
     return set? ERROR_OK : ERROR_FAIL;
@@ -254,11 +250,11 @@ MCP2515::ERROR MCP2515::setBitrate(const CAN_SPEED canSpeed, CAN_CLOCK canClock)
 MCP2515::ERROR MCP2515::setClkOut(const CAN_CLKOUT divisor)
 {
     if (divisor == CLKOUT_DISABLE) {
-	/* Turn off CLKEN */
-	modifyRegister(MCP_CANCTRL, CANCTRL_CLKEN, 0x00);
+        /* Turn off CLKEN */
+        modifyRegister(MCP_CANCTRL, CANCTRL_CLKEN, 0x00);
 
-	/* Turn on CLKOUT for SOF */
-	modifyRegister(MCP_CNF3, CNF3_SOF, CNF3_SOF);
+        /* Turn on CLKOUT for SOF */
+        modifyRegister(MCP_CNF3, CNF3_SOF, CNF3_SOF);
         return ERROR_OK;
     }
 
@@ -449,22 +445,13 @@ MCP2515::ERROR MCP2515::readMessage(struct can_frame *frame)
 bool MCP2515::checkReceive(void)
 {
     uint8_t res = getStatus();
-    if ( res & STAT_RXIF_MASK ) {
-        return true;
-    } else {
-        return false;
-    }
+    return !!( res & STAT_RXIF_MASK );
 }
 
 bool MCP2515::checkError(void)
 {
     uint8_t eflg = getErrorFlags();
-
-    if ( eflg & EFLG_ERRORMASK ) {
-        return true;
-    } else {
-        return false;
-    }
+    return !!( eflg & EFLG_ERRORMASK );
 }
 
 uint8_t MCP2515::getErrorFlags(void)
@@ -499,26 +486,20 @@ void MCP2515::clearTXInterrupts(void)
 
 void MCP2515::clearRXnOVR(void)
 {
-	uint8_t eflg = getErrorFlags();
-	if (eflg != 0) {
-		clearRXnOVRFlags();
-		clearInterrupts();
-		//modifyRegister(MCP_CANINTF, CANINTF_ERRIF, 0);
-	}
-	
+    uint8_t eflg = getErrorFlags();
+    if (eflg != 0) {
+        clearRXnOVRFlags();
+        clearInterrupts();
+    }
 }
 
 void MCP2515::clearMERR()
 {
-	//modifyRegister(MCP_EFLG, EFLG_RX0OVR | EFLG_RX1OVR, 0);
-	//clearInterrupts();
-	modifyRegister(MCP_CANINTF, CANINTF_MERRF, 0);
+    modifyRegister(MCP_CANINTF, CANINTF_MERRF, 0);
 }
 
 void MCP2515::clearERRIF()
 {
-    //modifyRegister(MCP_EFLG, EFLG_RX0OVR | EFLG_RX1OVR, 0);
-    //clearInterrupts();
     modifyRegister(MCP_CANINTF, CANINTF_ERRIF, 0);
 }
 
