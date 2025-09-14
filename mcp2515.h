@@ -449,7 +449,6 @@ class MCP2515
         uint8_t SPICS;
         uint32_t SPI_CLOCK;
         SPIClass * SPIn;
-        bool OSMflag;
 
     private:
 
@@ -474,6 +473,7 @@ class MCP2515
         ERROR setSleepMode();
         ERROR setLoopbackMode();
         ERROR setNormalMode();
+		ERROR setNormalOneShotMode();
         ERROR setClkOut(const CAN_CLKOUT divisor);
         ERROR setBitrate(const CAN_SPEED canSpeed);
         ERROR setBitrate(const CAN_SPEED canSpeed, const CAN_CLOCK canClock);
@@ -497,8 +497,6 @@ class MCP2515
         void clearERRIF();
         uint8_t errorCountRX(void);
         uint8_t errorCountTX(void);
-        void enableOSM(void);
-        void disableOSM(void);
 };
 
 #endif
