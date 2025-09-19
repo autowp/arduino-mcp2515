@@ -58,9 +58,10 @@ To create connection with MCP2515 provide pin number where SPI CS is connected (
 
 The available modes are listed as follows:
 ```C++
-mcp2515.setNormalMode();
-mcp2515.setLoopbackMode();
-mcp2515.setListenOnlyMode();
+mcp2515.setNormalMode(); // sends and receives data normally, sends acknowledgments to other nodes, when sending data, requires an acknowledgment from another node that the message was received or else, the 2515 will autonomously keep sending the same data
+mcp2515.setNormalOneShotMode(); // sends and receives data normally, sends acknoledgements to other nodes that their message was received, when sending data, does not require an acknowledgement from another node that the message was received.
+mcp2515.setLoopbackMode(); // data sent is immediately received and is not written to the bus, does not send acknowledgements
+mcp2515.setListenOnlyMode(); // does not send data, only receives data, does not send acknowledgements
 ```
 The available baudrates are listed as follows:
 ```C++
