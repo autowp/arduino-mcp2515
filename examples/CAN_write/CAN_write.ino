@@ -4,8 +4,10 @@
 struct can_frame canMsg1;
 struct can_frame canMsg2;
 MCP2515 mcp2515(10);
-
-
+/*MKR Board example
+#define Mhz *100000
+MCP2515 mcp2515(10, 10 Mhz); //Define my CS pin and SPI Speed
+*/
 void setup() {
   canMsg1.can_id  = 0x0F6;
   canMsg1.can_dlc = 8;
@@ -31,7 +33,7 @@ void setup() {
   
   while (!Serial);
   Serial.begin(115200);
-  
+  //mcp2515.begin();  //This function is only for MKR boards
   mcp2515.reset();
   mcp2515.setBitrate(CAN_125KBPS);
   mcp2515.setNormalMode();
