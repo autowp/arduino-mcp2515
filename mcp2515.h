@@ -274,6 +274,7 @@ class MCP2515
 
         enum /*class*/ CANCTRL_REQOP_MODE : uint8_t {
             CANCTRL_REQOP_NORMAL     = 0x00,
+            CANCTRL_REQOP_OSM        = 0x08,
             CANCTRL_REQOP_SLEEP      = 0x20,
             CANCTRL_REQOP_LOOPBACK   = 0x40,
             CANCTRL_REQOP_LISTENONLY = 0x60,
@@ -473,6 +474,7 @@ class MCP2515
         ERROR setSleepMode();
         ERROR setLoopbackMode();
         ERROR setNormalMode();
+        ERROR setNormalOneShotMode();
         ERROR setClkOut(const CAN_CLKOUT divisor);
         ERROR setBitrate(const CAN_SPEED canSpeed);
         ERROR setBitrate(const CAN_SPEED canSpeed, const CAN_CLOCK canClock);
