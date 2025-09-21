@@ -177,9 +177,14 @@ MCP2515::ERROR MCP2515::setNormalMode()
     return setMode(CANCTRL_REQOP_NORMAL);
 }
 
+MCP2515::ERROR MCP2515::setNormalOneShotMode()
+{
+    return setMode(CANCTRL_REQOP_OSM);
+}
+
 MCP2515::ERROR MCP2515::setMode(const CANCTRL_REQOP_MODE mode)
 {
-    modifyRegister(MCP_CANCTRL, CANCTRL_REQOP, mode);
+    modifyRegister(MCP_CANCTRL, CANCTRL_REQOP | CANCTRL_OSM, mode);
 
     unsigned long endTime = millis() + 10;
     bool modeMatch = false;
