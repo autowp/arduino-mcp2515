@@ -103,6 +103,14 @@ You can also set oscillator frequency for module when setting bitrate:
 ```C++
 mcp2515.setBitrate(CAN_125KBPS, MCP_8MHZ);
 ```
+<br>
+If necessary, you can change the SPI bus speed.
+The default speed is 10 MHz, which is not officially supported by the Arduino Uno, for example.
+Example for changing it to 8 MHz:
+
+```C++
+MCP2515 mcp2515(10, 8000000);
+```
 
 <br>
 The available clock speeds are listed as follows:
