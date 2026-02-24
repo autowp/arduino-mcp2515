@@ -597,7 +597,7 @@ MCP2515::ERROR MCP2515::setFilter(const RXF num, const bool ext, const uint32_t 
 MCP2515::ERROR MCP2515::sendMessage(const TXBn txbn, const struct can_frame *frame)
 {
     if (frame->can_dlc > CAN_MAX_DLEN) {
-        return ERROR_FAILTX;
+        return ERROR_INVALID_DLC;
     }
 
     const struct TXBn_REGS *txbuf = &TXB[txbn];
@@ -619,8 +619,14 @@ MCP2515::ERROR MCP2515::sendMessage(const TXBn txbn, const struct can_frame *fra
     modifyRegister(txbuf->CTRL, TXB_TXREQ, TXB_TXREQ);
 
     uint8_t ctrl = readRegister(txbuf->CTRL);
-    if ((ctrl & (TXB_ABTF | TXB_MLOA | TXB_TXERR)) != 0) {
+    if ((ctrl & TXB_TXERR) != 0) {
         return ERROR_FAILTX;
+    }
+    else if ((ctrl & TXB_MLOA) != 0) {
+        return ERROR_FAILTX_MLOA;
+    }
+    else if ((ctrl & TXB_ABTF) != 0) {
+        return ERROR_FAILTX_ABTF;
     }
     return ERROR_OK;
 }
@@ -628,7 +634,7 @@ MCP2515::ERROR MCP2515::sendMessage(const TXBn txbn, const struct can_frame *fra
 MCP2515::ERROR MCP2515::sendMessage(const struct can_frame *frame)
 {
     if (frame->can_dlc > CAN_MAX_DLEN) {
-        return ERROR_FAILTX;
+        return ERROR_INVALID_DLC;
     }
 
     TXBn txBuffers[N_TXBUFFERS] = {TXB0, TXB1, TXB2};
