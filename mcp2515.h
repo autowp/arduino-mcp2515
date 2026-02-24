@@ -487,6 +487,7 @@ class MCP2515
         bool checkReceive(void);
         bool checkError(void);
         uint8_t getErrorFlags(void);
+        uint8_t getControlRegister(void);
         void clearRXnOVRFlags(void);
         uint8_t getInterrupts(void);
         uint8_t getInterruptMask(void);

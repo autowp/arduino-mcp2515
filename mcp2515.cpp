@@ -723,6 +723,11 @@ uint8_t MCP2515::getErrorFlags(void)
     return readRegister(MCP_EFLG);
 }
 
+uint8_t MCP2515::getControlRegister(void) 
+{
+    return readRegister(MCP_CANCTRL);
+}
+
 void MCP2515::clearRXnOVRFlags(void)
 {
 	modifyRegister(MCP_EFLG, EFLG_RX0OVR | EFLG_RX1OVR, 0);
