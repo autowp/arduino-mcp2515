@@ -210,12 +210,15 @@ class MCP2515
 {
     public:
         enum ERROR {
-            ERROR_OK        = 0,
-            ERROR_FAIL      = 1,
-            ERROR_ALLTXBUSY = 2,
-            ERROR_FAILINIT  = 3,
-            ERROR_FAILTX    = 4,
-            ERROR_NOMSG     = 5
+            ERROR_OK          = 0,
+            ERROR_FAIL        = 1,
+            ERROR_ALLTXBUSY   = 2,
+            ERROR_FAILINIT    = 3,
+            ERROR_FAILTX      = 4,
+            ERROR_FAILTX_MLOA = 5,
+            ERROR_FAILTX_ABTF = 6,
+            ERROR_NOMSG       = 7,
+            ERROR_INVALID_DLC = 8
         };
 
         enum MASK {
