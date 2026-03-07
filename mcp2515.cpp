@@ -203,6 +203,28 @@ MCP2515::ERROR MCP2515::setMode(const CANCTRL_REQOP_MODE mode)
 
 }
 
+
+MCP2515::ERROR MCP2515::setRolloverMode(const bool enable)
+{
+    const uint8_t RXB0CTRL_BUKT_VALUE = enable ? RXB0CTRL_BUKT : 0;
+    modifyRegister(MCP_RXB0CTRL, RXB0CTRL_BUKT, RXB0CTRL_BUKT_VALUE);
+
+    unsigned long endTime = millis() + 10;
+    bool modeMatch = false;
+    while (millis() < endTime) {
+        uint8_t newmode = readRegister(MCP_RXB0CTRL);
+        newmode &= RXB0CTRL_BUKT;
+
+        modeMatch = newmode == RXB0CTRL_BUKT_VALUE;
+
+        if (modeMatch) {
+            break;
+        }
+    }
+
+    return modeMatch ? ERROR_OK : ERROR_FAIL;
+}
+
 MCP2515::ERROR MCP2515::setBitrate(const CAN_SPEED canSpeed)
 {
     return setBitrate(canSpeed, MCP_16MHZ);
