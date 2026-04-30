@@ -4,9 +4,9 @@
 #include <stdint.h>
 
 
-typedef unsigned char __u8;
-typedef unsigned short __u16;
-typedef unsigned long __u32;
+typedef uint8_t __u8;
+typedef uint16_t __u16;
+typedef uint32_t __u32;
 
 
 /* special address description flags for the CAN_ID */
