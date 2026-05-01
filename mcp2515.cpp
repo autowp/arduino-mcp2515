@@ -502,6 +502,20 @@ MCP2515::ERROR MCP2515::setBitrate(const CAN_SPEED canSpeed, CAN_CLOCK canClock)
     }
 }
 
+MCP2515::ERROR MCP2515::setBitTiming(uint8_t cnf1, uint8_t cnf2, uint8_t cnf3)
+{
+    ERROR error = setConfigMode();
+    if (error != ERROR_OK) {
+        return error;
+    }
+
+    setRegister(MCP_CNF1, cnf1);
+    setRegister(MCP_CNF2, cnf2);
+    setRegister(MCP_CNF3, cnf3);
+
+    return ERROR_OK;
+}
+
 MCP2515::ERROR MCP2515::setClkOut(const CAN_CLKOUT divisor)
 {
     if (divisor == CLKOUT_DISABLE) {
