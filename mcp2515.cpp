@@ -19,16 +19,28 @@ MCP2515::MCP2515(const uint8_t _CS, const uint32_t _SPI_CLOCK, SPIClass * _SPI)
     }
     else {
         SPIn = &SPI;
-        SPIn->begin();
     }
 
     SPICS = _CS;
     SPI_CLOCK = _SPI_CLOCK;
+    spiInitialized = false;
+}
+
+void MCP2515::begin() {
+    if (spiInitialized) {
+        return;  // Already initialized
+    }
     pinMode(SPICS, OUTPUT);
     digitalWrite(SPICS, HIGH);
+    SPIn->begin();
+    spiInitialized = true;
 }
 
 void MCP2515::startSPI() {
+    // Backward compatibility with code not calling begin() explicitly
+    if (!spiInitialized) {
+        begin();
+    }
     SPIn->beginTransaction(SPISettings(SPI_CLOCK, MSBFIRST, SPI_MODE0));
     digitalWrite(SPICS, LOW);
 }

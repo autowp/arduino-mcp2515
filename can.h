@@ -37,8 +37,8 @@ typedef __u32 canid_t;
 #define CAN_MAX_DLEN 8
 
 struct can_frame {
-               canid_t can_id;  /* 32 bit CAN_ID + EFF/RTR/ERR flags */
-               __u8    can_dlc; /* frame payload length in byte (0 .. CAN_MAX_DLEN) */
+    canid_t can_id;  /* 32 bit CAN_ID + EFF/RTR/ERR flags */
+    __u8    can_dlc; /* frame payload length in byte (0 .. CAN_MAX_DLEN) */
     alignas(8) __u8    data[CAN_MAX_DLEN];
 };
 
