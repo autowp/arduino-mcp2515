@@ -127,6 +127,28 @@ Default value is MCP_16MHZ
 <br>
 
 Note: To transfer data on high speed of CAN interface via UART dont forget to update UART baudrate as necessary.
+<br>
+
+Late SPI init for controllers that require manual SPI pin definition
+```C++
+MCP2515 mcp2515(10,10000000,&SPI,false);
+
+void setup() {
+    SPI.setRX(4);  // MISO (late SPI init)
+    SPI.setTX(3);  // MOSI
+    SPI.setSCK(2); // SCK
+    SPI.setCS(10);
+    SPI.begin();
+
+    mcp2515.reset();
+    mcp2515.setBitrate(CAN_500KBPS,MCP_8MHZ);
+    mcp2515.setNormalMode();
+}
+```
+<br>
+Desired SPI interface and transfer speed are set in constructor
+<br>
+SPI config is completed in setup() and SPI.begin() is called. 
 
 ## Frame data format
 
