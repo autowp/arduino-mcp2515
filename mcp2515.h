@@ -302,6 +302,8 @@ class MCP2515
         static const uint8_t RXB0CTRL_FILHIT = 0x00;
         static const uint8_t RXB1CTRL_FILHIT = 0x01;
 
+        static const uint8_t RXBnDLC = 0x40;
+
         static const uint8_t MCP_SIDH = 0;
         static const uint8_t MCP_SIDL = 1;
         static const uint8_t MCP_EID8 = 2;
@@ -450,6 +452,8 @@ class MCP2515
         uint8_t SPICS;
         uint32_t SPI_CLOCK;
         SPIClass * SPIn;
+
+        uint8_t mcp2515_rx_index = 0;
 
     private:
 

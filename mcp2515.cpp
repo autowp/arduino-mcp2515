@@ -646,14 +646,16 @@ MCP2515::ERROR MCP2515::sendMessage(const struct can_frame *frame)
 
 MCP2515::ERROR MCP2515::readMessage(const RXBn rxbn, struct can_frame *frame)
 {
-    const struct RXBn_REGS *rxb = &RXB[rxbn];
-
     uint8_t tbufdata[5];
 
-    readRegisters(rxb->SIDH, tbufdata, 5);
+    startSPI();
+
+    SPIn->transfer((rxbn == RXBn::RXB0) ? INSTRUCTION_READ_RX0 : INSTRUCTION_READ_RX1);
+    for (uint8_t i=0; i<5; i++) {
+        tbufdata[i] = SPIn->transfer(0x00);
+    }
 
     uint32_t id = (tbufdata[MCP_SIDH]<<3) + (tbufdata[MCP_SIDL]>>5);
-
     if ( (tbufdata[MCP_SIDL] & TXB_EXIDE_MASK) ==  TXB_EXIDE_MASK ) {
         id = (id<<2) + (tbufdata[MCP_SIDL] & 0x03);
         id = (id<<8) + tbufdata[MCP_EID8];
@@ -661,22 +663,23 @@ MCP2515::ERROR MCP2515::readMessage(const RXBn rxbn, struct can_frame *frame)
         id |= CAN_EFF_FLAG;
     }
 
-    uint8_t dlc = (tbufdata[MCP_DLC] & DLC_MASK);
+    if (tbufdata[MCP_DLC] & RXBnDLC) {
+        id |= CAN_RTR_FLAG;
+    }
+
+    const uint8_t dlc = (tbufdata[MCP_DLC] & DLC_MASK);
     if (dlc > CAN_MAX_DLEN) {
         return ERROR_FAIL;
     }
 
-    uint8_t ctrl = readRegister(rxb->CTRL);
-    if (ctrl & RXBnCTRL_RTR) {
-        id |= CAN_RTR_FLAG;
+    for (uint8_t i=0; i<dlc; i++) {
+        frame->data[i] = SPIn->transfer(0x00);
     }
 
     frame->can_id = id;
     frame->can_dlc = dlc;
 
-    readRegisters(rxb->DATA, frame->data, dlc);
-
-    modifyRegister(MCP_CANINTF, rxb->CANINTF_RXnIF, 0);
+    endSPI();
 
     return ERROR_OK;
 }
@@ -684,12 +687,16 @@ MCP2515::ERROR MCP2515::readMessage(const RXBn rxbn, struct can_frame *frame)
 MCP2515::ERROR MCP2515::readMessage(struct can_frame *frame)
 {
     ERROR rc;
-    uint8_t stat = getStatus();
 
-    if ( stat & STAT_RX0IF ) {
+    const uint8_t stat = getStatus();
+    if ( stat & STAT_RX0IF && mcp2515_rx_index == 0) {
         rc = readMessage(RXB0, frame);
+        if ( stat & STAT_RX1IF ) {
+            mcp2515_rx_index = 1;
+        }
     } else if ( stat & STAT_RX1IF ) {
         rc = readMessage(RXB1, frame);
+        mcp2515_rx_index = 0;
     } else {
         rc = ERROR_NOMSG;
     }
