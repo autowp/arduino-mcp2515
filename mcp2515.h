@@ -447,58 +447,57 @@ class MCP2515
             CANINTF  CANINTF_RXnIF;
         } RXB[N_RXBUFFERS];
 
-        uint8_t SPICS;
-        uint32_t SPI_CLOCK;
-        SPIClass * SPIn;
+        const uint8_t SPICS;
+        const uint32_t SPI_CLOCK;
+        SPIClass *SPIn;
 
     private:
+        void startSPI(void) const;
+        void endSPI(void) const;
 
-        void startSPI();
-        void endSPI();
+        ERROR setMode(const CANCTRL_REQOP_MODE mode) const;
 
-        ERROR setMode(const CANCTRL_REQOP_MODE mode);
+        uint8_t readRegister(const REGISTER reg) const;
+        void readRegisters(const REGISTER reg, uint8_t values[], const uint8_t n) const;
+        void setRegister(const REGISTER reg, const uint8_t value) const;
+        void setRegisters(const REGISTER reg, const uint8_t values[], const uint8_t n) const;
+        void modifyRegister(const REGISTER reg, const uint8_t mask, const uint8_t data) const;
 
-        uint8_t readRegister(const REGISTER reg);
-        void readRegisters(const REGISTER reg, uint8_t values[], const uint8_t n);
-        void setRegister(const REGISTER reg, const uint8_t value);
-        void setRegisters(const REGISTER reg, const uint8_t values[], const uint8_t n);
-        void modifyRegister(const REGISTER reg, const uint8_t mask, const uint8_t data);
+        static void prepareId(uint8_t *buffer, const bool ext, const uint32_t id);
 
-        void prepareId(uint8_t *buffer, const bool ext, const uint32_t id);
-    
     public:
-        MCP2515(const uint8_t _CS, const uint32_t _SPI_CLOCK = DEFAULT_SPI_CLOCK, SPIClass * _SPI = nullptr);
-        ERROR reset(void);
-        ERROR setConfigMode();
-        ERROR setListenOnlyMode();
-        ERROR setSleepMode();
-        ERROR setLoopbackMode();
-        ERROR setNormalMode();
-        ERROR setNormalOneShotMode();
-        ERROR setClkOut(const CAN_CLKOUT divisor);
-        ERROR setBitrate(const CAN_SPEED canSpeed);
-        ERROR setBitrate(const CAN_SPEED canSpeed, const CAN_CLOCK canClock);
-        ERROR setFilterMask(const MASK num, const bool ext, const uint32_t ulData);
-        ERROR setFilter(const RXF num, const bool ext, const uint32_t ulData);
-        ERROR sendMessage(const TXBn txbn, const struct can_frame *frame);
-        ERROR sendMessage(const struct can_frame *frame);
-        ERROR readMessage(const RXBn rxbn, struct can_frame *frame);
-        ERROR readMessage(struct can_frame *frame);
-        bool checkReceive(void);
-        bool checkError(void);
-        uint8_t getErrorFlags(void);
-        uint8_t getControlRegister(void);
-        void clearRXnOVRFlags(void);
-        uint8_t getInterrupts(void);
-        uint8_t getInterruptMask(void);
-        void clearInterrupts(void);
-        void clearTXInterrupts(void);
-        uint8_t getStatus(void);
-        void clearRXnOVR(void);
-        void clearMERR();
-        void clearERRIF();
-        uint8_t errorCountRX(void);
-        uint8_t errorCountTX(void);
+        explicit MCP2515(const uint8_t _CS, const uint32_t _SPI_CLOCK = DEFAULT_SPI_CLOCK, SPIClass *_SPI = nullptr);
+        ERROR reset(void) const;
+        ERROR setConfigMode(void) const;
+        ERROR setListenOnlyMode(void) const;
+        ERROR setSleepMode(void) const;
+        ERROR setLoopbackMode(void) const;
+        ERROR setNormalMode(void) const;
+        ERROR setNormalOneShotMode(void) const;
+        ERROR setClkOut(const CAN_CLKOUT divisor) const;
+        ERROR setBitrate(const CAN_SPEED canSpeed) const;
+        ERROR setBitrate(const CAN_SPEED canSpeed, const CAN_CLOCK canClock) const;
+        ERROR setFilterMask(const MASK num, const bool ext, const uint32_t ulData) const;
+        ERROR setFilter(const RXF num, const bool ext, const uint32_t ulData) const;
+        ERROR sendMessage(const TXBn txbn, const struct can_frame *frame) const;
+        ERROR sendMessage(const struct can_frame *frame) const;
+        ERROR readMessage(const RXBn rxbn, struct can_frame *frame) const;
+        ERROR readMessage(struct can_frame *frame) const;
+        bool checkReceive(void) const;
+        bool checkError(void) const;
+        uint8_t getErrorFlags(void) const;
+        uint8_t getControlRegister(void) const;
+        void clearRXnOVRFlags(void) const;
+        uint8_t getInterrupts(void) const;
+        uint8_t getInterruptMask(void) const;
+        void clearInterrupts(void) const;
+        void clearTXInterrupts(void) const;
+        uint8_t getStatus(void) const;
+        void clearRXnOVR(void) const;
+        void clearMERR(void) const;
+        void clearERRIF(void) const;
+        uint8_t errorCountRX(void) const;
+        uint8_t errorCountTX(void) const;
 };
 
 #endif
