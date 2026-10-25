@@ -604,9 +604,9 @@ MCP2515::ERROR MCP2515::sendMessage(const TXBn txbn, const struct can_frame *fra
 
     uint8_t data[13];
 
-    bool ext = (frame->can_id & CAN_EFF_FLAG);
-    bool rtr = (frame->can_id & CAN_RTR_FLAG);
-    uint32_t id = (frame->can_id & (ext ? CAN_EFF_MASK : CAN_SFF_MASK));
+    const bool ext = (frame->can_id & CAN_EFF_FLAG);
+    const bool rtr = (frame->can_id & CAN_RTR_FLAG);
+    const uint32_t id = (frame->can_id & (ext ? CAN_EFF_MASK : CAN_SFF_MASK));
 
     prepareId(data, ext, id);
 
@@ -614,11 +614,34 @@ MCP2515::ERROR MCP2515::sendMessage(const TXBn txbn, const struct can_frame *fra
 
     memcpy(&data[MCP_DATA], frame->data, frame->can_dlc);
 
-    setRegisters(txbuf->SIDH, data, 5 + frame->can_dlc);
+    startSPI();
+    if (txbn == TXBn::TXB0) {
+        SPIn->transfer(INSTRUCTION_LOAD_TX0);
+    } else if (txbn == TXBn::TXB1) {
+        SPIn->transfer(INSTRUCTION_LOAD_TX1);
+    } else if (txbn == TXBn::TXB2) {
+        SPIn->transfer(INSTRUCTION_LOAD_TX2);
+    } else {
+        return ERROR_FAILTX;
+    }
+    for (uint8_t i=0; i<(5 + frame->can_dlc); i++) {
+        SPIn->transfer(data[i]);
+    }
+    endSPI();
 
-    modifyRegister(txbuf->CTRL, TXB_TXREQ, TXB_TXREQ);
+    startSPI();
+    if (txbn == TXBn::TXB0) {
+        SPIn->transfer(INSTRUCTION_RTS_TX0);
+    } else if (txbn == TXBn::TXB1) {
+        SPIn->transfer(INSTRUCTION_RTS_TX1);
+    } else if (txbn == TXBn::TXB2) {
+        SPIn->transfer(INSTRUCTION_RTS_TX2);
+    } else {
+        return ERROR_FAILTX;
+    }
+    endSPI();
 
-    uint8_t ctrl = readRegister(txbuf->CTRL);
+    const uint8_t ctrl = readRegister(txbuf->CTRL);
     if ((ctrl & (TXB_ABTF | TXB_MLOA | TXB_TXERR)) != 0) {
         return ERROR_FAILTX;
     }
@@ -631,14 +654,13 @@ MCP2515::ERROR MCP2515::sendMessage(const struct can_frame *frame)
         return ERROR_FAILTX;
     }
 
-    TXBn txBuffers[N_TXBUFFERS] = {TXB0, TXB1, TXB2};
-
-    for (int i=0; i<N_TXBUFFERS; i++) {
-        const struct TXBn_REGS *txbuf = &TXB[txBuffers[i]];
-        uint8_t ctrlval = readRegister(txbuf->CTRL);
-        if ( (ctrlval & TXB_TXREQ) == 0 ) {
-            return sendMessage(txBuffers[i], frame);
-        }
+    const uint8_t status = getStatus();
+    if ( (status & STATUS_TXREQ0) == 0 ) {
+        return sendMessage(TXBn::TXB0, frame);
+    } else if ( (status & STATUS_TXREQ1) == 0 ) {
+        return sendMessage(TXBn::TXB1, frame);
+    } else if ( (status & STATUS_TXREQ2) == 0 ) {
+        return sendMessage(TXBn::TXB2, frame);
     }
 
     return ERROR_ALLTXBUSY;

@@ -302,6 +302,15 @@ class MCP2515
         static const uint8_t RXB0CTRL_FILHIT = 0x00;
         static const uint8_t RXB1CTRL_FILHIT = 0x01;
 
+        static const uint8_t STATUS_RX0IF  = 0x01;  // CANINTF[0]
+        static const uint8_t STATUS_RX1IF  = 0x02;  // CANINTF[1]
+        static const uint8_t STATUS_TXREQ0 = 0x04;  // TXB0CNTRL[3]
+        static const uint8_t STATUS_TX0IF  = 0x08;  // CANINTF[2]
+        static const uint8_t STATUS_TXREQ1 = 0x10;  // TXB1CNTRL[3]
+        static const uint8_t STATUS_TX1IF  = 0x20;  // CANINTF[3]
+        static const uint8_t STATUS_TXREQ2 = 0x40;  // TXB2CNTRL[3]
+        static const uint8_t STATUS_TX2IF  = 0x80;  // CANINTF[4]
+
         static const uint8_t MCP_SIDH = 0;
         static const uint8_t MCP_SIDL = 1;
         static const uint8_t MCP_EID8 = 2;
